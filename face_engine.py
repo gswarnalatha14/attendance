@@ -8,7 +8,7 @@ THRESHOLD = 0.35
 # ===============================
 # CONNECT TO ATLAS
 # ===============================
-MONGO_URI = "mongodb+srv://Swarna:reddy@cluster0.rxezs.mongodb.net/attendance_db?retryWrites=true&w=majority"
+
 
 client = MongoClient(MONGO_URI)
 db = client["attendance_db"]
@@ -98,5 +98,6 @@ def recognize_faces(frame):
             "score": float(score),
             "bbox": [x1, y1, x2, y2]
         })
+
 
     return results
