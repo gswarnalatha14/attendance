@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+</head>
+<body>
+
+<h2>Attendance System</h2>
+<video id="video" width="640" height="480" autoplay></video>
+
+<script>
+const video = document.getElementById("video");
+let labeledDescriptors = [];
+
+navigator.mediaDevices.getUserMedia({ video: {} })
+    .then(stream => video.srcObject = stream);
+
+async function loadUsers() {
+    const response = await fetch("/users");
+    const users = await response.json();
+
+    labeledDescriptors = users.map(user =>
+        new faceapi.LabeledFaceDescriptors(
+            user.name,
+            [new Float32Array(user.descriptor)]
+        )
+    );
+}
+
+video.addEventListener("play", async () => {
+    await loadUsers();
+
+    const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors);
+
+    setInterval(async () => {
+        const detection = await faceapi.detectSingleFace(
+            video,
+            new faceapi.TinyFaceDetectorOptions()
+        ).withFaceLandmarks().withFaceDescriptor();
+
+        if (detection) {
+            const match = faceMatcher.findBestMatch(detection.descriptor);
+
+            if (match.label !== "unknown") {
+                fetch("/mark_attendance", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name: match.label })
+                });
+
+                alert("Attendance marked for " + match.label);
+            }
+        }
+    }, 5000);
+});
+</script>
+
+</body>
+</html>
