@@ -23,7 +23,7 @@ app.secret_key = "attendai_secret"
 # =========================
 # DATABASE
 # =========================
-client = MongoClient("mongodb+srv://Swarna:reddy@cluster0.rxezs.mongodb.net/attendance_db?retryWrites=true&w=majority")
+client = MongoClient(os.environ.get("MONGO_URI"))
 db = client["attendance_db"]
 
 teachers_col = db["Teachers"]
@@ -427,3 +427,4 @@ def timetable():
 # =========================
 if __name__ == "__main__":
     app.run(debug=True)
+
