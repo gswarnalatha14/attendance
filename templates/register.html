@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Face</title>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js"></script>
+</head>
+<body>
+
+<h2>Register User</h2>
+<input type="text" id="name" placeholder="Enter Name">
+<video id="video" width="640" height="480" autoplay></video>
+<button onclick="registerUser()">Register</button>
+
+<script>
+const video = document.getElementById("video");
+
+navigator.mediaDevices.getUserMedia({ video: {} })
+    .then(stream => video.srcObject = stream);
+
+async function registerUser() {
+    const name = document.getElementById("name").value;
+
+    const detection = await faceapi.detectSingleFace(
+        video,
+        new faceapi.TinyFaceDetectorOptions()
+    ).withFaceLandmarks().withFaceDescriptor();
+
+    if (!detection) {
+        alert("No face detected");
+        return;
+    }
+
+    fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            name: name,
+            descriptor: Array.from(detection.descriptor)
+        })
+    });
+
+    alert("Registered successfully");
+}
+</script>
+
+</body>
+</html>
